@@ -14,7 +14,7 @@ def clear():
 ###############################
 
 
-def select_difficulty(difficulty):
+def select_difficulty():
     difficulty = input("Please select a difficulty:\n\n[E]asy: 4 - 6 characters\n[N]ormal: 6 - 8\n[H]ard:8+").lower()
 
     if difficulty != 'e' or difficulty != 'n' or difficulty != 'h':
@@ -26,7 +26,7 @@ def select_difficulty(difficulty):
 
 
 def get_word_from_file(difficulty):
-    mystery_word = None
+    mystery_word = ''
     difficulty_dict = get_difficulty_lists()
 
     if difficulty == 'e':
@@ -55,21 +55,27 @@ def get_difficulty_lists():
 
 
 
-def get_easy(f, easy_list):
+def get_easy(f):
+    easy_list = list()
+
     for line in f:
         if 4 <= len(line) <= 6:
             easy_list.append(line)
     return easy_list
 
 
-def get_normal(f, normal_list):
+def get_normal(f):
+    normal_list = ()
+
     for line in f:
         if 6 <= len(line) <= 8:
             normal_list.append(line)
     return normal_list
 
 
-def get_hard(f, get_hard):
+def get_hard(f):
+    hard_list = ()
+
     for line in f:
         if len(line) >= 8:
             get_hard.append(line)
@@ -91,6 +97,7 @@ def tell_how_many_letters(mystery_word):
 #########################
 
 
+
 def get_user_guess(guessed_letters):
     guess = input("Please enter your guess. You have {} chances left.\n\nSo far, you have guessed:\n{}\n".format(guesses_left, guessed_letters))
 
@@ -103,7 +110,7 @@ def get_user_guess(guessed_letters):
 def test_guess(guess, guessed_letters):
     if len(guess) > 1:
         print("Please only guess one letter at a time.")
-        return get_user_guess()
+        return get_user_guess(guessed)
 
     has_been_guessed(guess, guessed_letters)
 
@@ -130,7 +137,7 @@ def check_and_print_match_in_word(mystery_word, guess, guessed_letters):
     if guess in mystery_word:
         clear()
         print("Yeah! That one is in there. Keep it up!\n\n")
-        display_word_with_guesses(mystery_word, guess, guessed_letters)
+        display_word_with_guesses(mystery_word, guess)
     else:
         clear()
         print("Sorry, that's incorrect.\n\n")
@@ -146,7 +153,7 @@ def check_and_print_match_in_word(mystery_word, guess, guessed_letters):
 ##########################
 
 
-def display_word_with_guesses(mystery_word, guess, guessed_letters):
+def display_word_with_guesses(mystery_word, guess):
     mystery_word = mystery_word.split()
     print(((('*' * ((len(mystery_word) * 3)+ 4) + '\n'))) + '*' + ((("' '" * (len(mystery_word + 2)) + '*\n*') * 4)), end='')
     print_word(mystery_word, guess)
@@ -177,12 +184,12 @@ def check_for_win(mystery_word, guessed_letters):
 
     for letter in mystery_word:
         if letter in guessed_letters:
-            guessed_letters.remove(letter)
             number_correct += 1
+        else:
+            return False
 
-        if len(mystery_word) != number_correct:
+        if len(mystery_word) == number_correct:
             return True
-
 
 
 
@@ -225,18 +232,18 @@ def main():
     random_word = None
     guesses_left = 8
 
-    difficulty = select_difficulty(guessed_letters)
+    difficulty = select_difficulty()
 
     mystery_word = get_word_from_file(difficulty)
 
     tell_how_many_letters(mystery_word)
 
     while True:
-        get_user_guess()
+        get_user_guess(guessed_letters)
 
-        check_and_print_match_in_word(mystery_word, guess)
+        check_and_print_match_in_word(mystery_word, guess, guessed_letters)
 
-        if check_for_win():
+        if check_for_win(mystery_word, guessed_letters):
             show_winner(guesses_left)
             break
         elif guesses_left <= 0:
