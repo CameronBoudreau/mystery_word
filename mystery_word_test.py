@@ -1,3 +1,9 @@
+mport unittest
+from mystery_word import *
+
+word_list = ["bird", "calf", "river", "stream", "kneecap",  "cookbook",
+             "language", "sneaker", "algorithm", "integration", "brain"]
+
 # Difficulty selected
 
 # Number of chars output
