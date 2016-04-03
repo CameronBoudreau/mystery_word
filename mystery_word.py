@@ -141,11 +141,11 @@ def get_user_guess(mystery_word, guessed_letters, guesses_left):
 
 
 def is_guess_valid(mystery_word, guess, guessed_letters):
-    if not is_guess_too_long(mystery_word, guess, guessed_letters):
+    if not is_guess_one_letter(mystery_word, guess, guessed_letters):
         return False
     elif not is_guess_a_letter(mystery_word, guess, guessed_letters):
         return False
-    elif not has_been_guessed(mystery_word, guess, guessed_letters):
+    elif has_been_guessed(mystery_word, guess, guessed_letters):
         return False
     else:
         return True
@@ -160,7 +160,7 @@ def is_guess_a_letter(mystery_word, guess, guessed_letters):
     else:
         return True
 
-def is_guess_too_long(mystery_word, guess, guessed_letters):
+def is_guess_one_letter(mystery_word, guess, guessed_letters):
     if len(guess) > 1:
         clear()
         print("*" * 40)
@@ -174,9 +174,9 @@ def has_been_guessed(mystery_word, guess, guessed_letters):
         clear()
         print("*" * 40)
         print("\nYou already tried that letter.\n\nThe word is {} letters long.\nSo far, you have guessed: {}\n".format(len(mystery_word), ", ".join(guessed_letters)))
-        return False
-    else:
         return True
+    else:
+        return False
 
 
 #################################
