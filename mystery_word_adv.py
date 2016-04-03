@@ -4,6 +4,42 @@ from time import sleep
 import sys
 
 
+def cull_list(mystery_word, guess, possible_words, guessed_letters):
+    word_dict = {}
+    index = 0
+    while index < len(mystery_word):
+        word_dict[index] = get_position_list(guess, possible_words, index, mystery_word, guessed_letters)
+        index += 1
+
+    longest_list = max(word_dict.keys(), key=(lambda k: word_dict[k]))
+    possible_words = word_dict[longest_list]
+    # print(possible_words[:100], '\n\n^Possible list after cull\n\n\n')
+    return possible_words
+
+def get_position_list(guess, possible_words, index, mystery_word, guessed_letters):
+    new_list = []
+    # print(possible_words[:200], '\n^Possible list at start of get position list\n\n\n')
+
+    for word in possible_words:
+        # word = word.split()
+        if word[mystery_word.index(guess)] == guess:
+            new_list.append(word)
+
+    # print(new_list[:100], '\n^New list at end of changing list\n\n\n')
+
+    return new_list
+
+
+def eliminate_other_word_lengths(mystery_word, possible_words):
+    new_list = []
+    for word in possible_words:
+        if len(word) == len(mystery_word):
+            new_list.append(word)
+
+    return new_list
+
+
+
 def clear():
     if os.name == 'nt':
         os.system('cls')
@@ -39,6 +75,7 @@ def is_difficulty_valid(difficulty):
     else:
         return True
 
+
 # Get word
 def get_word_from_file(difficulty):
     mystery_word = ''
@@ -47,9 +84,7 @@ def get_word_from_file(difficulty):
 
     with open('/usr/share/dict/words', 'r') as f:
         difficulty_list = get_correct_list(f, difficulty)
-
         return difficulty_list
-
 
 def get_correct_list(f, difficulty):
     if difficulty == 'e':
@@ -66,7 +101,7 @@ def get_easy(f):
     easy_list = []
     for line in f:
         if 4 <= len(line) <= 6:
-            easy_list.append(line)
+            easy_list.append((line.rstrip()).upper())
     return easy_list
 
 
@@ -74,7 +109,7 @@ def get_normal(f):
     normal_list = []
     for line in f:
         if 6 <= len(line) <= 8:
-            normal_list.append(line)
+            normal_list.append(line.rstrip().upper())
     return normal_list
 
 
@@ -82,7 +117,7 @@ def get_hard(f):
     hard_list = []
     for line in f:
         if len(line) >= 8:
-            hard_list.append(line)
+            hard_list.append(line.rstrip().upper())
     return hard_list
 
 
@@ -225,21 +260,23 @@ def display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorr
     length = len(mystery_word)
     draw_hangman(incorrect)
     print('\n')
-    print_word(mystery_word, guessed_letters, word_so_far)
+    print_word(mystery_word, guessed_letters, word_so_far, printed)
 
 
-def print_word(mystery_word, guessed_letters, word_so_far):
+def print_word(mystery_word, guessed_letters, word_so_far, printed):
     if len(mystery_word) == 0:
         print_text("".join(word_so_far) + '\n', True,)
         return ''
 
     for letter in mystery_word:
         if mystery_word[0] in guessed_letters:
-            word_so_far.append("  " + letter.upper() + "  ")
-            return print_word(mystery_word[1:], guessed_letters, word_so_far)
+            if mystery_word[0] not in printed:
+                printed.append(mystery_word[0])
+                word_so_far.append("  " + letter.upper() + "  ")
+                return print_word(mystery_word[1:], guessed_letters, word_so_far, printed)
         else:
             word_so_far.append(" __ ")
-            return print_word(mystery_word[1:], guessed_letters, word_so_far)
+            return print_word(mystery_word[1:], guessed_letters, word_so_far, printed)
 
 
 def check_for_win(mystery_word, guessed_letters):
@@ -257,11 +294,11 @@ def incorrect_guess(mystery_word, guessed_letters, word_so_far, incorrect):
     print(("\nSorry, that isn't one of the letters. Try again!\n\nSo far, you have guessed: {}\n\n".format(", ".join(guessed_letters))))
     print_word(mystery_word, guessed_letters, word_so_far)
 
-def correct_guess(mystery_word, guessed_letters, word_so_far, incorrect):
+def correct_guess(mystery_word, guessed_letters, word_so_far, incorrect, printed):
     clear()
     draw_hangman(incorrect)
     print("\nYeah! That one is in there. Keep it up!\n\nSo far, you have guessed: {}\n\n".format(", ".join(guessed_letters)))
-    print_word(mystery_word, guessed_letters, word_so_far)
+    print_word(mystery_word, guessed_letters, word_so_far, printed)
 
 
 def show_winner(mystery_word, guessed_letters, word_so_far, incorrect):
@@ -295,19 +332,25 @@ def main():
     word_so_far = []
     incorrect = 0
     possible_words = []
+
     difficulty = select_difficulty()
 
     possible_words = get_word_from_file(difficulty)
-    mystery_word = (random.choice(possible_words).rstrip()).upper()
+    mystery_word = (random.choice(possible_words).upper())
+    possible_words = eliminate_other_word_lengths(mystery_word, possible_words)
+
+    print("First mystery_word: ", mystery_word)
+    possible_words = eliminate_other_word_lengths(mystery_word, possible_words)
 
     print("\nYour word is {} letters long. Good luck!\n".format(len(mystery_word)))
-
+    print('mystery_word at start: ', mystery_word)
     while True:
+
         guess = get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far)
         word_so_far = []
+        printed = []
+
         guessed_letters.append(guess)
-        print("guess before check :", guess)
-        print("word before check: ", mystery_word)
         if not is_match_in_word(mystery_word, guess):
             incorrect += 1
             if guesses_left <= 1:
@@ -321,8 +364,12 @@ def main():
                 clear()
                 show_winner(mystery_word, guessed_letters, word_so_far, incorrect)
                 break
-            correct_guess(mystery_word, guessed_letters, word_so_far, incorrect)
-
+            correct_guess(mystery_word, guessed_letters, word_so_far, incorrect, printed)
+        print("mystery_word before cull: ", mystery_word)
+        possible_words = cull_list(mystery_word, guess, possible_words, guessed_letters)
+        mystery_word = (random.choice(possible_words).upper())
+        print("mystery_word after cull: ", mystery_word)
+        print(possible_words[:100], "\n\n\npossible words after cull: \n")
 
 
     if go_again() == True:
