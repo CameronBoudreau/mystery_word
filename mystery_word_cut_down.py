@@ -16,11 +16,11 @@ def print_text(a_string, a_is_slow):
         for words in a_string + "\n":
             sys.stdout.write(words)
             sys.stdout.flush()
-            sleep(.05)
+            sleep(.04)
     else:
         print(a_string)
 
-# Difficulty
+
 def select_difficulty():
     difficulty = input("Please select a difficulty:\n\n[E]asy: 4 - 6 characters\n[N]ormal: 6 - 8\n[H]ard:8+ \n>").lower()
 
@@ -32,7 +32,6 @@ def select_difficulty():
         print("*" * 40 + '\n')
         return select_difficulty()
 
-
 def is_difficulty_valid(difficulty):
     if difficulty != 'e' and difficulty != 'n' and difficulty != 'h' or len(difficulty) > 1:
         clear()
@@ -40,48 +39,31 @@ def is_difficulty_valid(difficulty):
     else:
         return True
 
-
-
 # Get word
 def get_word_from_file(difficulty):
     mystery_word = ''
-    difficulty_dict = get_difficulty_lists()
     clear()
     print("*" * 40)
-    if difficulty == 'e':
-        print("\nYou have chosen Easy mode.")
-        mystery_word = random.choice(difficulty_dict['e'])
-    elif difficulty == 'n':
-        print("\nYou have chosen Normal mode.")
-        mystery_word = random.choice(difficulty_dict['n'])
-    elif difficulty == 'h':
-        print("\nYou have chosen Hard mode.")
-        mystery_word = random.choice(difficulty_dict['h'])
-    return (mystery_word.upper()).rstrip()
-
-
-
-def get_difficulty_lists():
 
     with open('/usr/share/dict/words', 'r') as f:
-        easy_list = get_easy(f)
-        f.seek(0)
-        normal_list = get_normal(f)
-        f.seek(0)
-        hard_list = get_hard(f)
+        difficulty_list = get_correct_list(f, difficulty)
 
-        difficulty_dict = {
-        'e':easy_list,
-        'n':normal_list,
-        'h':hard_list
-        }
+        return difficulty_list
 
-    return difficulty_dict
+
+def get_correct_list(f, difficulty):
+    if difficulty == 'e':
+        difficulty_list = get_easy(f)
+    elif difficulty == 'n':
+        difficulty_list = get_normal(f)
+    elif difficulty == 'h':
+        difficulty_list = get_hard(f)
+
+    return difficulty_list
 
 
 def get_easy(f):
     easy_list = []
-
     for line in f:
         if 4 <= len(line) <= 6:
             easy_list.append(line)
@@ -90,7 +72,6 @@ def get_easy(f):
 
 def get_normal(f):
     normal_list = []
-
     for line in f:
         if 6 <= len(line) <= 8:
             normal_list.append(line)
@@ -99,39 +80,23 @@ def get_normal(f):
 
 def get_hard(f):
     hard_list = []
-
     for line in f:
         if len(line) >= 8:
             hard_list.append(line)
     return hard_list
 
 
-
-def tell_how_many_letters(mystery_word):
-    print("\nYour word is {} letters long. Good luck!\n".format(len(mystery_word)))
-
-
-
-
-###########################
-####   Guess & Check   ####
-###########################
-
-
-
-def get_user_guess(mystery_word, guessed_letters, guesses_left):
+def get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far):
     print("*" * 40)
-
-    if guesses_left < 8:
-        guess = input("\nPlease enter your guess. You have {} chances left.\n".format(guesses_left))
-    else:
-        guess = input("\nPlease enter your guess. You have {} chances.\n".format(guesses_left))
+    word_so_far = []
+    guess = input("\nPlease enter your guess. You have {} chances left.\n".format(guesses_left))
     guess = guess.upper()
 
     if is_guess_valid(mystery_word, guess, guessed_letters):
         return guess
     else:
-        return get_user_guess(mystery_word, guessed_letters, guesses_left)
+        print_word(mystery_word, guessed_letters, word_so_far)
+        return get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far)
 
 
 def is_guess_valid(mystery_word, guess, guessed_letters):
@@ -173,22 +138,11 @@ def has_been_guessed(mystery_word, guess, guessed_letters):
         return False
 
 
-#################################
-####   Checking for Match    ####
-#################################
-
-
 def is_match_in_word(mystery_word, guess):
-
     if guess in mystery_word:
         return True
     else:
         return False
-
-
-##########################
-####   Display Game   ####
-##########################
 
 
 def draw_hangman(incorrect):
@@ -213,11 +167,10 @@ def draw_line_one(incorrect):
         print('')
 
 def draw_line_two(incorrect):
-    if incorrect > 1:
-        if incorrect > 3:
-            print((" " * 14) + "|" + (" " * 4) + "|")
-        else:
-            print((" " * 19) + "|")
+    if incorrect > 3:
+        print((" " * 14) + "|" + (" " * 4) + "|")
+    elif incorrect > 1:
+        print((" " * 19) + "|")
     else:
         print("")
 
@@ -230,30 +183,30 @@ def draw_line_three(incorrect):
         print("")
 
 def draw_line_four(incorrect):
-    if incorrect > 1:
-        if incorrect > 6:
-            print((" " * 13) + "/|\\" + (" " * 3) + "|")
-        elif incorrect > 5:
-            print((" " * 14) + "|" + (" " * 4) + "|")
-        else:
-            print((" " * 19) + "|")
+    if incorrect > 6:
+        print((" " * 13) + "/|\\" + (" " * 3) + "|")
+    elif incorrect > 5:
+        print((" " * 14) + "|" + (" " * 4) + "|")
+    elif incorrect > 1:
+        print((" " * 19) + "|")
+    else:
+        print('')
 
 def draw_line_five(incorrect):
     if incorrect > 5:
         print((" " * 14) + "|" + (" " * 4) + "|")
     elif incorrect > 1:
         print((" " * 19) + "|")
-
+    else:
+        print('')
 
 def draw_line_six(incorrect):
-    if incorrect > 1:
-        if incorrect > 7:
-            print((" " * 13) + "/ \\" + (" " * 3) + "|")
-        else:
-            print((" " * 19) + "|")
+    if incorrect > 7:
+        print((" " * 13) + "/ \\" + (" " * 3) + "|")
+    elif incorrect > 1:
+        print((" " * 19) + "|")
     else:
         print("")
-
 
 def draw_line_seven(incorrect):
     if incorrect > 0:
@@ -262,19 +215,17 @@ def draw_line_seven(incorrect):
         print('')
 
 def draw_line_eight(incorrect):
-    if incorrect > 0:
-        print(("_" * 12) + "|_________|  ")
+    if incorrect >= 0:
+        print(("_" * 12) + "|_________|" + "_" * 8)
     else:
-        print("_" * 20)
-
-
+        print("_" * 20 + '\n\n')
 
 
 def display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect):
     length = len(mystery_word)
-    print_word(mystery_word, guessed_letters, word_so_far)
     draw_hangman(incorrect)
-
+    print('\n')
+    print_word(mystery_word, guessed_letters, word_so_far)
 
 
 def print_word(mystery_word, guessed_letters, word_so_far):
@@ -286,15 +237,9 @@ def print_word(mystery_word, guessed_letters, word_so_far):
         if mystery_word[0] in guessed_letters:
             word_so_far.append("  " + letter.upper() + "  ")
             return print_word(mystery_word[1:], guessed_letters, word_so_far)
-        elif mystery_word[0] not in guessed_letters:
+        else:
             word_so_far.append(" __ ")
             return print_word(mystery_word[1:], guessed_letters, word_so_far)
-
-
-
-#######################
-####   Win Check   ####
-#######################
 
 
 def check_for_win(mystery_word, guessed_letters):
@@ -306,35 +251,38 @@ def check_for_win(mystery_word, guessed_letters):
         if number_correct == len(mystery_word):
             return True
 
+def incorrect_guess(mystery_word, guessed_letters, word_so_far, incorrect):
+    clear()
+    draw_hangman(incorrect)
+    print(("\nSorry, that isn't one of the letters. Try again!\n\nSo far, you have guessed: {}\n\n".format(", ".join(guessed_letters))))
+    print_word(mystery_word, guessed_letters, word_so_far)
+
+def correct_guess(mystery_word, guessed_letters, word_so_far, incorrect):
+    clear()
+    draw_hangman(incorrect)
+    print("\nYeah! That one is in there. Keep it up!\n\nSo far, you have guessed: {}\n\n".format(", ".join(guessed_letters)))
+    print_word(mystery_word, guessed_letters, word_so_far)
+
 
 def show_winner(mystery_word, guessed_letters, word_so_far, incorrect):
-    print("\nYou got it in {} guesses! Congrats!\nThe word was {}.\n\n".format(len(guessed_letters), mystery_word))
+    clear()
+    display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect)
+
+    print("\nYOU GOT IT IN {} GUESSES! CONGRATS!\n\n".format(len(guessed_letters)))
     print("*" * 40 + '\n')
 
-def print_loss_message(mystery_word, guessed_letters, word_so_far, incorrect):
-    print("\nSorry you didn't get it this time.\n\n\nThe word was {}.\n\n".format(mystery_word))
-    print("*" * 40 + '\n')
-
-
-
-
-
-####################
-####   Again?   ####
-####################
-
+def print_loss_message(mystery_word, word_so_far, incorrect):
+    clear()
+    draw_hangman(incorrect)
+    print("\nSORRY, YOU DIDN'T GET IT THIS TIME.\n\n")
+    print_word(mystery_word, list(mystery_word), word_so_far)
+    print("\n" + "*" * 40 + '\n')
 
 
 def go_again():
     again = input("\nWould you like to go again? [y/N] \n")
     if again.lower() == 'y':
         return True
-
-
-
-##################
-####   Main   ####
-##################
 
 
 def main():
@@ -346,48 +294,36 @@ def main():
     guesses_left = 8
     word_so_far = []
     incorrect = 0
-
+    possible_words = []
     difficulty = select_difficulty()
 
-    mystery_word = get_word_from_file(difficulty)
+    possible_words = get_word_from_file(difficulty)
+    mystery_word = (random.choice(possible_words).rstrip()).upper()
 
-    tell_how_many_letters(mystery_word)
+    print("\nYour word is {} letters long. Good luck!\n".format(len(mystery_word)))
 
     while True:
-        guess = get_user_guess(mystery_word, guessed_letters, guesses_left)
-        print("After full guess function, get guess guessed letters: ", guessed_letters)
-        print("After full get guess guess: ", guess)
-
+        guess = get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far)
         word_so_far = []
         guessed_letters.append(guess)
-        print("After append guessed letters: ", guessed_letters)
-
-
+        print("guess before check :", guess)
+        print("word before check: ", mystery_word)
         if not is_match_in_word(mystery_word, guess):
-            if guesses_left <= 0:
-                clear()
-                print_loss_message(mystery_word, guesses_left, word_so_far, incorrect)
-                display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect)
+            incorrect += 1
+            if guesses_left <= 1:
+                print_loss_message(mystery_word, word_so_far, incorrect)
                 break
-            else:
-                guesses_left -= 1
-                incorrect += 1
-                clear()
-                print(("*" * 40) + "\nSorry, that isn't one of the letters. Try again!\n\nSo far, you have guessed: {}\n".format(", ".join(guessed_letters)))
-                print("*" * 40 + '\n')
-                display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect)
+            incorrect_guess(mystery_word, guessed_letters, word_so_far, incorrect)
+            guesses_left -= 1
 
         else:
             if check_for_win(mystery_word, guessed_letters):
                 clear()
                 show_winner(mystery_word, guessed_letters, word_so_far, incorrect)
-                display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect)
                 break
-            else:
-                clear()
-                print(("*" * 40) + "\nYeah! That one is in there. Keep it up!\n\nSo far, you have guessed: {}\n".format(", ".join(guessed_letters)))
-                print("*" * 40 + '\n')
-                display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect)
+            correct_guess(mystery_word, guessed_letters, word_so_far, incorrect)
+
+
 
     if go_again() == True:
         main()

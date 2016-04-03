@@ -1,5 +1,5 @@
 import unittest
-from mystery_word import *
+from mystery_word_cut_down import *
 
 guessed_letters = ['a', 'b']
 
