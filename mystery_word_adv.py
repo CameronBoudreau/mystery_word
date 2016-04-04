@@ -20,7 +20,7 @@ def cull_list(mystery_word, guess, possible_words, guessed_letters):
     else:
         return possible_words
 
-        
+
 def get_position_list(guess, possible_words, index, mystery_word, guessed_letters):
     new_list = []
     # print(possible_words[:200], '\n^Possible list at start of get position list\n\n\n')
@@ -125,7 +125,7 @@ def get_hard(f):
     return hard_list
 
 
-def get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far):
+def get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far, printed):
     print("*" * 40)
     word_so_far = []
     guess = input("\nPlease enter your guess. You have {} chances left.\n".format(guesses_left))
@@ -134,8 +134,8 @@ def get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far):
     if is_guess_valid(mystery_word, guess, guessed_letters):
         return guess
     else:
-        print_word(mystery_word, guessed_letters, word_so_far)
-        return get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far)
+        print_word(mystery_word, guessed_letters, word_so_far, printed)
+        return get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far, printed)
 
 
 def is_guess_valid(mystery_word, guess, guessed_letters):
@@ -317,7 +317,7 @@ def print_loss_message(mystery_word, word_so_far, incorrect):
     clear()
     draw_hangman(incorrect)
     print("\nSORRY, YOU DIDN'T GET IT THIS TIME.\n\n")
-    print_word(mystery_word, list(mystery_word), word_so_far)
+    print_word(mystery_word, list(mystery_word), word_so_far, printed)
     print("\n" + "*" * 40 + '\n')
 
 
@@ -337,6 +337,7 @@ def main():
     word_so_far = []
     incorrect = 0
     possible_words = []
+    printed = []
 
     difficulty = select_difficulty()
 
@@ -351,7 +352,7 @@ def main():
     print('mystery_word at start: ', mystery_word)
     while True:
 
-        guess = get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far)
+        guess = get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far, printed)
         word_so_far = []
         printed = []
 
