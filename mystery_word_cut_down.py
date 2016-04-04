@@ -306,8 +306,6 @@ def main():
         guess = get_user_guess(mystery_word, guessed_letters, guesses_left, word_so_far)
         word_so_far = []
         guessed_letters.append(guess)
-        print("guess before check :", guess)
-        print("word before check: ", mystery_word)
         if not is_match_in_word(mystery_word, guess):
             incorrect += 1
             if guesses_left <= 1:
