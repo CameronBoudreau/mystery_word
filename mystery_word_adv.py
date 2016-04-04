@@ -7,21 +7,25 @@ import sys
 def cull_list(mystery_word, guess, possible_words, guessed_letters):
     word_dict = {}
     index = 0
-    while index < len(mystery_word):
-        word_dict[index] = get_position_list(guess, possible_words, index, mystery_word, guessed_letters)
-        index += 1
 
-    longest_list = max(word_dict.keys(), key=(lambda k: word_dict[k]))
-    possible_words = word_dict[longest_list]
-    # print(possible_words[:100], '\n\n^Possible list after cull\n\n\n')
-    return possible_words
+    if guess in mystery_word:
+        while index < len(mystery_word):
+            word_dict[index] = get_position_list(guess, possible_words, index, mystery_word, guessed_letters)
+            index += 1
 
+        longest_list = max(word_dict.keys(), key=(lambda k: word_dict[k]))
+        possible_words = word_dict[longest_list]
+        # print(possible_words[:100], '\n\n^Possible list after cull\n\n\n')
+        return possible_words
+    else:
+        return possible_words
+
+        
 def get_position_list(guess, possible_words, index, mystery_word, guessed_letters):
     new_list = []
     # print(possible_words[:200], '\n^Possible list at start of get position list\n\n\n')
 
     for word in possible_words:
-        # word = word.split()
         if word[mystery_word.index(guess)] == guess:
             new_list.append(word)
 
@@ -256,7 +260,7 @@ def draw_line_eight(incorrect):
         print("_" * 20 + '\n\n')
 
 
-def display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect):
+def display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect, printed):
     length = len(mystery_word)
     draw_hangman(incorrect)
     print('\n')
@@ -288,11 +292,12 @@ def check_for_win(mystery_word, guessed_letters):
         if number_correct == len(mystery_word):
             return True
 
-def incorrect_guess(mystery_word, guessed_letters, word_so_far, incorrect):
+
+def incorrect_guess(mystery_word, guessed_letters, word_so_far, incorrect, printed):
     clear()
     draw_hangman(incorrect)
     print(("\nSorry, that isn't one of the letters. Try again!\n\nSo far, you have guessed: {}\n\n".format(", ".join(guessed_letters))))
-    print_word(mystery_word, guessed_letters, word_so_far)
+    print_word(mystery_word, guessed_letters, word_so_far, printed)
 
 def correct_guess(mystery_word, guessed_letters, word_so_far, incorrect, printed):
     clear()
@@ -301,9 +306,9 @@ def correct_guess(mystery_word, guessed_letters, word_so_far, incorrect, printed
     print_word(mystery_word, guessed_letters, word_so_far, printed)
 
 
-def show_winner(mystery_word, guessed_letters, word_so_far, incorrect):
+def show_winner(mystery_word, guessed_letters, word_so_far, incorrect, printed):
     clear()
-    display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect)
+    display_word_with_guesses(mystery_word, guessed_letters, word_so_far, incorrect, printed)
 
     print("\nYOU GOT IT IN {} GUESSES! CONGRATS!\n\n".format(len(guessed_letters)))
     print("*" * 40 + '\n')
@@ -356,13 +361,13 @@ def main():
             if guesses_left <= 1:
                 print_loss_message(mystery_word, word_so_far, incorrect)
                 break
-            incorrect_guess(mystery_word, guessed_letters, word_so_far, incorrect)
+            incorrect_guess(mystery_word, guessed_letters, word_so_far, incorrect, printed)
             guesses_left -= 1
 
         else:
             if check_for_win(mystery_word, guessed_letters):
                 clear()
-                show_winner(mystery_word, guessed_letters, word_so_far, incorrect)
+                show_winner(mystery_word, guessed_letters, word_so_far, incorrect, printed)
                 break
             correct_guess(mystery_word, guessed_letters, word_so_far, incorrect, printed)
         print("mystery_word before cull: ", mystery_word)
